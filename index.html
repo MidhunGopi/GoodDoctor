@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoodDoctor - Healthcare Reviews</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏥 GoodDoctor</h1>
+            <p class="tagline">Transparent Healthcare Reviews - By Patients, For Patients</p>
+            <nav>
+                <button class="nav-btn active" onclick="showSection('home')">Home</button>
+                <button class="nav-btn" onclick="showSection('search')">Search Reviews</button>
+                <button class="nav-btn" onclick="showSection('add-profile')">Add Profile</button>
+                <button class="nav-btn" onclick="showSection('add-review')">Add Review</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h2>Welcome to GoodDoctor</h2>
+                <p>Your independent platform for genuine healthcare reviews</p>
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>📝 Review Doctors</h3>
+                        <p>Share your experience with healthcare professionals</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🏥 Review Hospitals & Labs</h3>
+                        <p>Help others choose the right healthcare facility</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>✅ Verified Reviews</h3>
+                        <p>Upload consultation proof for genuine feedback</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔍 Search & Compare</h3>
+                        <p>Find and compare healthcare providers easily</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="recent-reviews">
+                <h3>Recent Reviews</h3>
+                <div id="recentReviewsList"></div>
+            </div>
+        </section>
+
+        <!-- Search Section -->
+        <section id="search" class="section">
+            <h2>Search Healthcare Providers</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by doctor name, hospital, department, or location...">
+                <select id="typeFilter">
+                    <option value="all">All Types</option>
+                    <option value="doctor">Doctors</option>
+                    <option value="hospital">Hospitals</option>
+                    <option value="lab">Labs</option>
+                </select>
+                <button onclick="searchProfiles()">Search</button>
+            </div>
+            <div id="searchResults"></div>
+        </section>
+
+        <!-- Add Profile Section -->
+        <section id="add-profile" class="section">
+            <h2>Add Healthcare Provider Profile</h2>
+            <form id="profileForm" class="form-card">
+                <div class="form-group">
+                    <label for="profileType">Type *</label>
+                    <select id="profileType" required onchange="updateProfileForm()">
+                        <option value="">Select Type</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="hospital">Hospital</option>
+                        <option value="lab">Laboratory</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="profileName">Name *</label>
+                    <input type="text" id="profileName" placeholder="Enter full name or facility name" required>
+                </div>
+
+                <!-- Doctor-specific fields -->
+                <div id="doctorFields" class="conditional-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="specialization">Specialization *</label>
+                        <input type="text" id="specialization" placeholder="e.g., Cardiologist, Pediatrician">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="qualification">Qualification</label>
+                        <input type="text" id="qualification" placeholder="e.g., MBBS, MD, MS">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Years of Experience</label>
+                        <input type="number" id="experience" placeholder="Years" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="workingHospital">Currently Working At</label>
+                        <input type="text" id="workingHospital" placeholder="Hospital or clinic name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" placeholder="e.g., Cardiology, Emergency">
+                    </div>
+                </div>
+
+                <!-- Hospital-specific fields -->
+                <div id="hospitalFields" class="conditional-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="hospitalType">Hospital Type</label>
+                        <select id="hospitalType">
+                            <option value="">Select Type</option>
+                            <option value="government">Government</option>
+                            <option value="private">Private</option>
+                            <option value="trust">Trust/Charitable</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="beds">Number of Beds</label>
+                        <input type="number" id="beds" placeholder="Bed capacity" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="departments">Departments Available</label>
+                        <input type="text" id="departments" placeholder="e.g., Cardiology, Orthopedics, Emergency">
+                    </div>
+                </div>
+
+                <!-- Lab-specific fields -->
+                <div id="labFields" class="conditional-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="labServices">Services Offered</label>
+                        <input type="text" id="labServices" placeholder="e.g., Blood Tests, X-Ray, MRI, CT Scan">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accreditation">Accreditation</label>
+                        <input type="text" id="accreditation" placeholder="e.g., NABL, ISO">
+                    </div>
+                </div>
+
+                <!-- Common fields -->
+                <div class="form-group">
+                    <label for="address">Address *</label>
+                    <textarea id="address" rows="2" placeholder="Full address" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City *</label>
+                    <input type="text" id="city" placeholder="City" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State *</label>
+                    <input type="text" id="state" placeholder="State" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="Contact number">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Email address">
+                </div>
+
+                <button type="submit" class="btn-primary">Create Profile</button>
+            </form>
+        </section>
+
+        <!-- Add Review Section -->
+        <section id="add-review" class="section">
+            <h2>Add Review</h2>
+            <form id="reviewForm" class="form-card">
+                <div class="form-group">
+                    <label for="reviewType">Review Type *</label>
+                    <select id="reviewType" required onchange="loadProfiles()">
+                        <option value="">Select Type</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="hospital">Hospital</option>
+                        <option value="lab">Laboratory</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewProfile">Select Provider *</label>
+                    <select id="reviewProfile" required>
+                        <option value="">First select review type</option>
+                    </select>
+                    <small>Don't see the provider? <a href="#" onclick="showSection('add-profile'); return false;">Add a new profile</a></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="rating">Overall Rating *</label>
+                    <div class="rating-input">
+                        <span class="star" data-rating="1" onclick="setRating(1)">☆</span>
+                        <span class="star" data-rating="2" onclick="setRating(2)">☆</span>
+                        <span class="star" data-rating="3" onclick="setRating(3)">☆</span>
+                        <span class="star" data-rating="4" onclick="setRating(4)">☆</span>
+                        <span class="star" data-rating="5" onclick="setRating(5)">☆</span>
+                    </div>
+                    <input type="hidden" id="rating" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="visitDate">Date of Visit *</label>
+                    <input type="date" id="visitDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewTitle">Review Title *</label>
+                    <input type="text" id="reviewTitle" placeholder="Brief summary of your experience" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewText">Your Review *</label>
+                    <textarea id="reviewText" rows="5" placeholder="Share your detailed experience..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Rate Specific Aspects</label>
+                    <div class="aspect-ratings">
+                        <div class="aspect-rating">
+                            <label>Behavior/Attitude:</label>
+                            <select id="behaviorRating">
+                                <option value="5">Excellent</option>
+                                <option value="4">Good</option>
+                                <option value="3">Average</option>
+                                <option value="2">Poor</option>
+                                <option value="1">Very Poor</option>
+                            </select>
+                        </div>
+                        <div class="aspect-rating">
+                            <label>Wait Time:</label>
+                            <select id="waitTimeRating">
+                                <option value="5">Minimal</option>
+                                <option value="4">Short</option>
+                                <option value="3">Moderate</option>
+                                <option value="2">Long</option>
+                                <option value="1">Very Long</option>
+                            </select>
+                        </div>
+                        <div class="aspect-rating">
+                            <label>Cleanliness:</label>
+                            <select id="cleanlinessRating">
+                                <option value="5">Excellent</option>
+                                <option value="4">Good</option>
+                                <option value="3">Average</option>
+                                <option value="2">Poor</option>
+                                <option value="1">Very Poor</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="proofType">Proof of Visit *</label>
+                    <select id="proofType" required>
+                        <option value="">Select proof type</option>
+                        <option value="op_id">OP/Patient ID</option>
+                        <option value="prescription">Prescription</option>
+                        <option value="bill">Bill/Receipt</option>
+                        <option value="appointment">Appointment Card</option>
+                        <option value="report">Medical Report</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="proofId">Proof ID/Reference Number *</label>
+                    <input type="text" id="proofId" placeholder="Enter document reference number" required>
+                    <small>This helps verify genuine reviews. Personal information will not be displayed publicly.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="verifyGenuine" required>
+                        I certify that this review is based on my genuine experience and I have provided valid proof of visit
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewerName">Your Name (Optional)</label>
+                    <input type="text" id="reviewerName" placeholder="Leave blank to post anonymously">
+                </div>
+
+                <button type="submit" class="btn-primary">Submit Review</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 GoodDoctor - Independent Healthcare Review Platform</p>
+            <p>Empowering patients with transparent, genuine reviews</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
