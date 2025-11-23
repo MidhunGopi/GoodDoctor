@@ -7,6 +7,17 @@ let profiles = [];
 let reviews = [];
 let currentRating = 0;
 
+// Utility function to escape HTML and prevent XSS
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Load data from localStorage on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
@@ -30,7 +41,7 @@ function saveData() {
 }
 
 // Navigation
-function showSection(sectionId) {
+function showSection(sectionId, clickedButton) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
@@ -44,8 +55,10 @@ function showSection(sectionId) {
     // Show selected section
     document.getElementById(sectionId).classList.add('active');
     
-    // Add active class to clicked button
-    event.target.classList.add('active');
+    // Add active class to clicked button if provided
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
     
     // Refresh content based on section
     if (sectionId === 'home') {
@@ -111,9 +124,9 @@ function createProfile() {
         return;
     }
     
-    // Create base profile
+    // Create base profile with unique ID
     const profile = {
-        id: Date.now(),
+        id: Date.now() + Math.random().toString(36).substr(2, 9),
         type: profileType,
         name: profileName,
         address: document.getElementById('address').value,
@@ -222,7 +235,7 @@ function submitReview() {
     }
     
     const review = {
-        id: Date.now(),
+        id: Date.now() + Math.random().toString(36).substr(2, 9),
         profileId: profileId,
         profileType: document.getElementById('reviewType').value,
         rating: rating,
@@ -321,29 +334,29 @@ function displaySearchResults(filteredProfiles) {
             <div class="profile-card">
                 <div class="profile-header">
                     <div>
-                        <div class="profile-name">${profile.name}</div>
-                        ${profile.specialization ? `<div style="color: #666; margin-top: 5px;">${profile.specialization}</div>` : ''}
-                        ${profile.workingHospital ? `<div style="color: #666; font-size: 0.9rem; margin-top: 3px;">Working at: ${profile.workingHospital}</div>` : ''}
+                        <div class="profile-name">${escapeHtml(profile.name)}</div>
+                        ${profile.specialization ? `<div style="color: #666; margin-top: 5px;">${escapeHtml(profile.specialization)}</div>` : ''}
+                        ${profile.workingHospital ? `<div style="color: #666; font-size: 0.9rem; margin-top: 3px;">Working at: ${escapeHtml(profile.workingHospital)}</div>` : ''}
                     </div>
-                    <span class="profile-type">${profile.type}</span>
+                    <span class="profile-type">${escapeHtml(profile.type)}</span>
                 </div>
                 <div class="profile-details">
-                    ${profile.qualification ? `<p><strong>Qualification:</strong> ${profile.qualification}</p>` : ''}
-                    ${profile.experience ? `<p><strong>Experience:</strong> ${profile.experience} years</p>` : ''}
-                    ${profile.department ? `<p><strong>Department:</strong> ${profile.department}</p>` : ''}
-                    ${profile.hospitalType ? `<p><strong>Type:</strong> ${profile.hospitalType}</p>` : ''}
-                    ${profile.beds ? `<p><strong>Beds:</strong> ${profile.beds}</p>` : ''}
-                    ${profile.departments ? `<p><strong>Departments:</strong> ${profile.departments}</p>` : ''}
-                    ${profile.labServices ? `<p><strong>Services:</strong> ${profile.labServices}</p>` : ''}
-                    ${profile.accreditation ? `<p><strong>Accreditation:</strong> ${profile.accreditation}</p>` : ''}
-                    <p><strong>Location:</strong> ${profile.city}, ${profile.state}</p>
-                    ${profile.phone ? `<p><strong>Phone:</strong> ${profile.phone}</p>` : ''}
+                    ${profile.qualification ? `<p><strong>Qualification:</strong> ${escapeHtml(profile.qualification)}</p>` : ''}
+                    ${profile.experience ? `<p><strong>Experience:</strong> ${escapeHtml(profile.experience)} years</p>` : ''}
+                    ${profile.department ? `<p><strong>Department:</strong> ${escapeHtml(profile.department)}</p>` : ''}
+                    ${profile.hospitalType ? `<p><strong>Type:</strong> ${escapeHtml(profile.hospitalType)}</p>` : ''}
+                    ${profile.beds ? `<p><strong>Beds:</strong> ${escapeHtml(profile.beds)}</p>` : ''}
+                    ${profile.departments ? `<p><strong>Departments:</strong> ${escapeHtml(profile.departments)}</p>` : ''}
+                    ${profile.labServices ? `<p><strong>Services:</strong> ${escapeHtml(profile.labServices)}</p>` : ''}
+                    ${profile.accreditation ? `<p><strong>Accreditation:</strong> ${escapeHtml(profile.accreditation)}</p>` : ''}
+                    <p><strong>Location:</strong> ${escapeHtml(profile.city)}, ${escapeHtml(profile.state)}</p>
+                    ${profile.phone ? `<p><strong>Phone:</strong> ${escapeHtml(profile.phone)}</p>` : ''}
                 </div>
                 <div class="profile-rating">
                     <span class="rating-stars">${stars}</span>
                     <span class="rating-count">(${profile.reviewCount} reviews)</span>
                 </div>
-                <button class="view-reviews-btn" onclick="viewProfileReviews(${profile.id})">View Reviews</button>
+                <button class="view-reviews-btn" onclick="viewProfileReviews('${escapeHtml(profile.id)}')">View Reviews</button>
             </div>
         `;
     }).join('');
@@ -362,7 +375,7 @@ function viewProfileReviews(profileId) {
         resultsDiv.innerHTML = `
             <div class="message info">
                 <button onclick="searchProfiles()" style="float: right; background: none; border: none; cursor: pointer; font-size: 1.2rem;">×</button>
-                <h3>${profile.name}</h3>
+                <h3>${escapeHtml(profile.name)}</h3>
                 <p>No reviews yet. Be the first to review!</p>
             </div>
         `;
@@ -373,7 +386,7 @@ function viewProfileReviews(profileId) {
     
     resultsDiv.innerHTML = `
         <div class="message info" style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Reviews for ${profile.name}</h3>
+            <h3>Reviews for ${escapeHtml(profile.name)}</h3>
             <button onclick="searchProfiles()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0 10px;">×</button>
         </div>
         ${reviewsHTML}
@@ -407,27 +420,27 @@ function generateReviewHTML(review, profile = null) {
         <div class="review-card">
             <div class="review-header">
                 <div>
-                    <div class="review-title">${review.title}</div>
+                    <div class="review-title">${escapeHtml(review.title)}</div>
                     <div class="review-meta">
                         <div class="review-rating">
                             <span class="review-stars">${stars}</span>
                             <span>${review.rating}/5</span>
                         </div>
                         <span>Visited: ${date}</span>
-                        <span>By: ${review.reviewerName}</span>
+                        <span>By: ${escapeHtml(review.reviewerName)}</span>
                     </div>
                 </div>
                 ${review.verified ? '<span class="verified-badge">✓ Verified Visit</span>' : ''}
             </div>
-            ${profile ? `<p style="color: #667eea; font-weight: 600; margin-bottom: 10px;">Review for: ${profile.name}</p>` : ''}
-            <div class="review-content">${review.content}</div>
+            ${profile ? `<p style="color: #667eea; font-weight: 600; margin-bottom: 10px;">Review for: ${escapeHtml(profile.name)}</p>` : ''}
+            <div class="review-content">${escapeHtml(review.content)}</div>
             <div class="review-aspects">
                 <div class="aspect"><strong>Behavior:</strong> ${aspectValues[review.behaviorRating]}</div>
                 <div class="aspect"><strong>Wait Time:</strong> ${aspectValues[review.waitTimeRating]}</div>
                 <div class="aspect"><strong>Cleanliness:</strong> ${aspectValues[review.cleanlinessRating]}</div>
             </div>
             <div class="review-footer">
-                <span>Proof: ${review.proofType.replace('_', ' ').toUpperCase()}</span>
+                <span>Proof: ${escapeHtml(review.proofType.replace('_', ' ').toUpperCase())}</span>
                 <span>Posted: ${new Date(review.createdAt).toLocaleDateString()}</span>
             </div>
         </div>
